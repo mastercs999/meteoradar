@@ -9,7 +9,7 @@ function Radar(wrapper) {
     // Map image animation help variables
     var animationHandler = null;
     var imageIds = [];
-    var animatedImageIndex = 0;
+    var animatedIndex = 0;
 
     // Current snapshots
     var snapshots = {};
@@ -17,50 +17,43 @@ function Radar(wrapper) {
     // Set callback on select or slider change
     $(".times").change(function() {
         stop();
-        play(getSelectUrls());
+        play();
     });
     $(".slider-selection").on("input", function() {
         pause();
-        refreshMap(getSliderUrls());
+        setSnapshot(getSliderIndex());
     })
 
     // Set callback on play/pause/stop
-    $(".control-button").click(toggleAnimation);
+    $(".control-button").click(function() {
+         // Either play or pause animation
+         if ($(".control-button").hasClass("play"))
+             play();
+         else
+             pause();
+    });
     $(".stop").click(stop);
     
     // Show map
-    imageLayer = initMap(); 
+    var imageLayer = initMap(); 
 
     // First download possible snapshots for last 2 days
     downloadSnapshots((function(d){ d.setDate(d.getDate()-2); return d})(new Date), function() {
-        prepareDay()
+        prepareControls();
+        play();
     });
+
 
     
 
-    // Inits map and returns handler to image layer
-    function initMap() {
-        var center = SMap.Coords.fromWGS84(15.472962, 49.817492);
-        var map = new SMap(JAK.gel("czMap"), center, 7);
-        map.addDefaultLayer(SMap.DEF_BASE).enable();
-        map.addDefaultControls();
-
-        // Add image layer
-        var imageLayer = new SMap.Layer.Image();    
-        map.addLayer(imageLayer, false);                     
-        imageLayer.enable();
-        $(imageLayer.getContainer()[0].parentElement).addClass("mapy-layers");
-        
-        return imageLayer;
-    }
-
     // Starts the animation from currently selected image
-    function play(urls) {
+    function play() {
 
         // Set button class
         $(".control-button").removeClass("play").addClass("pause");
 
-        refreshMap(urls, true);
+        // Start animating
+        animateSnapshots(getSelectIndicies());
     }
 
     // Pauses the animation
@@ -69,64 +62,72 @@ function Radar(wrapper) {
         // Set button class
         $(".control-button").removeClass("pause").addClass("play");
 
+        // Stop animation
         if (animationHandler != null)
             clearInterval(animationHandler);
     }
 
     // Stops the animation
     function stop() {
-        pause();
-
-        animatedImageIndex = 0;
         
-        setImage(getSelectUrls());
+        // Set button class
+        $(".control-button").removeClass("pause").addClass("play");
+
+        // Stop animation
+        if (animationHandler != null)
+            clearInterval(animationHandler);
+        
+        // Reset current snapshot index on the first index of selected snapshots
+        animatedIndex = 0;
+        
+        // Set the first snapshot
+        setSnapshot(getSelectIndicies()[0]);
     }
 
-    // Set current image on the map
-    function setImage(urls) {
-        
-        // Set image
-        var id = imageLayer.addImage(urls[animatedImageIndex]["url"], SMap.Coords.fromWGS84(snapshots["start-lon"], snapshots["start-lat"]), SMap.Coords.fromWGS84(snapshots["end-lon"], snapshots["end-lat"]));
-        setTimeout(function() {
-            for (var i in imageIds)
-                imageLayer.removeImage(imageIds[i]);
-            imageIds.length = 0
-            imageIds.push(id);
-        }, 1);
-
-        // Sync time holder
-        $(".time-holder").text(urls[animatedImageIndex]["datetime"]);
-    }
-
-    // Set images to map by selection
-    function refreshMap(urls, unpause) {
+    // Starts animate given indicies
+    function animateSnapshots(indicies) {
 
         // Stop current animation
         if (animationHandler != null)
             clearInterval(animationHandler);
 
-        // Either start from the beginning or not
-        if (!unpause)
-            animatedImageIndex = 0;
-
         // Set images to layer and start animation
-        if (urls.length == 1)
-            setImage(urls);
+        if (indicies.length == 1)
+            setSnapshot(indicies[0]);
         else {
             animationHandler = setInterval(function _temp() {
 
                 // Change image
-                setImage(urls);
+                setSnapshot(indicies[animatedIndex]);
 
-                animatedImageIndex = ++animatedImageIndex % urls.length;
+                animatedIndex = ++animatedIndex % indicies.length;
 
                 return _temp;
             }(), ANIMATION_DELAY);
         }
     }
 
-    // Prepares selecting of hours
-    function prepareDay() {
+    // Set current image on the map and syncs time holder
+    function setSnapshot(index) {
+        
+        // Set image
+        var id = imageLayer.addImage(snapshots["images"][index]["url"], SMap.Coords.fromWGS84(snapshots["start-lon"], snapshots["start-lat"]), SMap.Coords.fromWGS84(snapshots["end-lon"], snapshots["end-lat"]));
+        
+        // Remove previous images
+        setTimeout(function() {
+            for (var i in imageIds)
+                imageLayer.removeImage(imageIds[i]);
+            imageIds.length = 0
+
+            imageIds.push(id);
+        }, 1);
+
+        // Sync time holder
+        $(".time-holder").text(formatDateTime(snapshots["images"][index]["datetime"]));
+    }
+
+    // Prepares map and controls by snapshots
+    function prepareControls() {
         
         // Clear select list
         var select = $(".times");
@@ -146,53 +147,23 @@ function Radar(wrapper) {
 
         // Select first 6
         select.find("option").slice(0, FIRST_SNAPSHOTS).attr('selected', true);
+        animatedIndex = 0;
 
-        // Set slider
+        // Set slider's max value
         $(".slider-selection").attr("max", snapshots["images"].length - 1)
-
-        // Refresh map
-        play(getSelectUrls());
     }
 
-    // Either play or pause animation
-    function toggleAnimation() {
-
-        // Get action
-        var shouldPlay = $(".control-button").hasClass("play");
-
-        // Either play or pause animation
-        if (shouldPlay)
-            play(getSelectUrls());
-        else
-            pause();
-    }
-
-    // Get urls of selected images in select
-    function getSelectUrls() {
+    // Get indicies of selected images in select
+    function getSelectIndicies() {
         return $.map($(".times option:selected"), function (x) {
-            return {
-                url: snapshots["images"][parseInt($(x).attr("data-index"))]["url"],
-                datetime: $(x).text()
-            }
+            return parseInt($(x).attr("data-index"));
         }).reverse()
     }
 
-    // Get urls of selected images in slider
-    function getSliderUrls() {
-
-        var snapshot = snapshots["images"][parseInt($(".slider-selection").val())];
-        var datetime = snapshot["datetime"];
-        var text = formatDateTime(datetime);
-
-        return [{
-            url: snapshot["url"],
-            datetime: text
-        }];
+    // Gets index of selected snapshots in slider
+    function getSliderIndex() {
+        return parseInt($(".slider-selection").val());
     }
-
-    
-
-
 
     // Download possible snapshots for given date
     function downloadSnapshots(date, callback) {
@@ -223,6 +194,22 @@ function Radar(wrapper) {
 
             callback();
         });
+    }
+
+    // Inits map and returns handler to image layer
+    function initMap() {
+        var center = SMap.Coords.fromWGS84(15.472962, 49.817492);
+        var map = new SMap(JAK.gel("czMap"), center, 7);
+        map.addDefaultLayer(SMap.DEF_BASE).enable();
+        map.addDefaultControls();
+
+        // Add image layer
+        var imageLayer = new SMap.Layer.Image();    
+        map.addLayer(imageLayer, false);                     
+        imageLayer.enable();
+        $(imageLayer.getContainer()[0].parentElement).addClass("mapy-layers");
+        
+        return imageLayer;
     }
 
     // Returns string representation of datetime
