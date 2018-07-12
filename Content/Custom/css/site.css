@@ -1,0 +1,56 @@
+﻿body {
+    margin: 0
+}
+
+.wrapper {
+    display: flex
+}
+
+#czMap {
+    width: 800px;
+    height: 500px;
+}
+
+.mapy-layers > div:last-child  {
+    opacity: 0.7;
+}
+
+.time-holder {
+    margin: 10px 0
+}
+
+.times {
+    height: 458px
+}
+
+.slider-selection {
+    width: 800px;
+    display: block;
+}
+
+.map-button {
+    display: inline-block;
+    margin-left: 24px;
+    cursor: pointer;
+}
+
+.play {
+    width: 0;
+    height: 0;
+    border-top: 16px solid transparent;
+    border-left: 24px solid #000;
+    border-bottom: 16px solid transparent;
+}
+
+.pause {
+    width: 8px;
+    height: 32px;
+    border-right: 8px solid #000;
+    border-left: 8px solid #000;
+}
+
+.stop {
+    width: 32px;
+    height: 32px;
+    background-color: #000;
+}
