@@ -1,6 +1,4 @@
 function Radar(wrapper) {
-    
-    this.wrapper = wrapper;
 
     // Constants
     var FIRST_SNAPSHOTS = 6;
@@ -15,24 +13,24 @@ function Radar(wrapper) {
     var snapshots = {};
 
     // Set callback on select or slider change
-    $(".times").change(function() {
+    wrapper.find(".times").change(function() {
         stop();
         play();
     });
-    $(".slider-selection").on("input", function() {
+    wrapper.find(".slider-selection").on("input", function() {
         pause();
         setSnapshot(getSliderIndex());
     })
 
     // Set callback on play/pause/stop
-    $(".control-button").click(function() {
+    wrapper.find(".control-button").click(function() {
          // Either play or pause animation
-         if ($(".control-button").hasClass("play"))
+         if ($(this).hasClass("play"))
              play();
          else
              pause();
     });
-    $(".stop").click(stop);
+    wrapper.find(".stop").click(stop);
     
     // Show map
     var imageLayer = initMap(); 
@@ -50,7 +48,7 @@ function Radar(wrapper) {
     function play() {
 
         // Set button class
-        $(".control-button").removeClass("play").addClass("pause");
+        wrapper.find(".control-button").removeClass("play").addClass("pause");
 
         // Start animating
         animateSnapshots(getSelectIndicies());
@@ -60,7 +58,7 @@ function Radar(wrapper) {
     function pause() {
 
         // Set button class
-        $(".control-button").removeClass("pause").addClass("play");
+        wrapper.find(".control-button").removeClass("pause").addClass("play");
 
         // Stop animation
         if (animationHandler != null)
@@ -71,7 +69,7 @@ function Radar(wrapper) {
     function stop() {
         
         // Set button class
-        $(".control-button").removeClass("pause").addClass("play");
+        wrapper.find(".control-button").removeClass("pause").addClass("play");
 
         // Stop animation
         if (animationHandler != null)
@@ -123,14 +121,14 @@ function Radar(wrapper) {
         }, 1);
 
         // Sync time holder
-        $(".time-holder").text(formatDateTime(snapshots["images"][index]["datetime"]));
+        wrapper.find(".time-holder").text(formatDateTime(snapshots["images"][index]["datetime"]));
     }
 
     // Prepares map and controls by snapshots
     function prepareControls() {
         
         // Clear select list
-        var select = $(".times");
+        var select = wrapper.find(".times");
         select.empty();
         
         // Attach dates to select
@@ -150,19 +148,19 @@ function Radar(wrapper) {
         animatedIndex = 0;
 
         // Set slider's max value
-        $(".slider-selection").attr("max", snapshots["images"].length - 1)
+        wrapper.find(".slider-selection").attr("max", snapshots["images"].length - 1)
     }
 
     // Get indicies of selected images in select
     function getSelectIndicies() {
-        return $.map($(".times option:selected"), function (x) {
+        return $.map(wrapper.find(".times option:selected"), function (x) {
             return parseInt($(x).attr("data-index"));
         }).reverse()
     }
 
     // Gets index of selected snapshots in slider
     function getSliderIndex() {
-        return parseInt($(".slider-selection").val());
+        return parseInt(wrapper.find(".slider-selection").val());
     }
 
     // Download possible snapshots for given date
@@ -199,7 +197,8 @@ function Radar(wrapper) {
     // Inits map and returns handler to image layer
     function initMap() {
         var center = SMap.Coords.fromWGS84(15.472962, 49.817492);
-        var map = new SMap(JAK.gel("czMap"), center, 7);
+        
+        var map = new SMap(JAK.gel(wrapper.find(".czMap")[0]), center, 7);
         map.addDefaultLayer(SMap.DEF_BASE).enable();
         map.addDefaultControls();
 

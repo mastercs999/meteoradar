@@ -2,11 +2,11 @@
     margin: 0
 }
 
-.wrapper {
+.main {
     display: flex
 }
 
-#czMap {
+.czMap {
     width: 800px;
     height: 500px;
 }

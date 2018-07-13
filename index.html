@@ -14,22 +14,23 @@
 </head>
 <body>
 
-    <div class="wrapper">
-        <div id="czMap"></div>
-        <div class="side">
-            <h3 class="time-holder"></h3>
-            <select class="times" multiple>
-            </select>
+    <div class="wrapper long-radar">
+        <div class="main">
+            <div class="czMap"></div>
+            <div class="side">
+                <h3 class="time-holder"></h3>
+                <select class="times" multiple>
+                </select>
+            </div>
         </div>
+        <input type="range" class="slider-selection" min="0" />
+        <div class="pause control-button map-button"></div>
+        <div class="stop map-button"></div>
     </div>
-    <input type="range" class="slider-selection" min="0" />
-    <div class="pause control-button map-button"></div>
-    <div class="stop map-button"></div>
     
     <script>
         OnInit(function () {
-
-            new Radar();
+            new Radar($(".long-radar"));
         })
     </script>
 
