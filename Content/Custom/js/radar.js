@@ -1,4 +1,4 @@
-function Radar(wrapper) {
+function Radar(wrapper, initDateTime, getUrlFunc) {
 
     // Constants
     var FIRST_SNAPSHOTS = 6;
@@ -36,7 +36,7 @@ function Radar(wrapper) {
     var imageLayer = initMap(); 
 
     // First download possible snapshots for last 2 days
-    downloadSnapshots((function(d){ d.setDate(d.getDate()-2); return d})(new Date), function() {
+    downloadSnapshots(initDateTime, function() {
         prepareControls();
         play();
     });
@@ -165,9 +165,8 @@ function Radar(wrapper) {
 
     // Download possible snapshots for given date
     function downloadSnapshots(date, callback) {
-        date = new Date(date.getFullYear(), date.getMonth(), date.getDate())
         
-        httpGetAsync("https://api.meteopress.cz/radar-composite-manager/v2/composites/3/images?since=" + toUnixTime(date), function(json) {
+        httpGetAsync(getUrlFunc(date), function(json) {
             json = JSON.parse(json);
 
             // Process json
@@ -227,14 +226,14 @@ function Radar(wrapper) {
         xmlHttp.open("GET", url, true);
         xmlHttp.send(null);
     }
+}
 
-    // Converts unix time stamp to JS date
-    function fromUnixTime(timestamp) {
-        return new Date(timestamp * 1000);
-    }
+// Converts unix time stamp to JS date
+function fromUnixTime(timestamp) {
+    return new Date(timestamp * 1000);
+}
 
-    // Converts date to unix timestamp
-    function toUnixTime(date) {
-        return date.getTime() / 1000;
-    }
+// Converts date to unix timestamp
+function toUnixTime(date) {
+    return date.getTime() / 1000;
 }

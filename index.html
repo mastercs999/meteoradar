@@ -27,10 +27,31 @@
         <div class="pause control-button map-button"></div>
         <div class="stop map-button"></div>
     </div>
+
+    <div class="wrapper short-radar">
+        <div class="main">
+            <div class="czMap"></div>
+            <div class="side">
+                <h3 class="time-holder"></h3>
+                <select class="times" multiple>
+                </select>
+            </div>
+        </div>
+        <input type="range" class="slider-selection" min="0" />
+        <div class="pause control-button map-button"></div>
+        <div class="stop map-button"></div>
+    </div>
     
     <script>
         OnInit(function () {
-            new Radar($(".long-radar"));
+            new Radar($(".long-radar"), (function(d){ d.setDate(d.getDate()-2); return d})(new Date), function(date) {
+                date = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+                return "https://api.meteopress.cz/radar-composite-manager/v2/composites/3/images?since=" + toUnixTime(date)
+            });
+            new Radar($(".short-radar"), (function(d){ d.setHours(d.getHours()-2); return d})(new Date), function(date) {
+                date = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), 0, 0, 0);
+                return "https://api.meteopress.cz/radar-composite-manager/v2/composites/1/images?since=" + toUnixTime(date) + "&until=" + (toUnixTime(date) + 12000 * 10) 
+            });
         })
     </script>
 
