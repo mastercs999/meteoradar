@@ -195,9 +195,15 @@ function Radar(wrapper, initDateTime, getUrlFunc) {
 
     // Inits map and returns handler to image layer
     function initMap() {
+
+        // Set map width
+        var mapDiv = wrapper.find(".czMap");
+        mapDiv.width(mapDiv.parent().width() - mapDiv.next().width())
+
+        // Init and center
         var center = SMap.Coords.fromWGS84(15.472962, 49.817492);
-        
-        var map = new SMap(JAK.gel(wrapper.find(".czMap")[0]), center, 7);
+
+        var map = new SMap(JAK.gel(mapDiv[0]), center, 7);
         map.addDefaultLayer(SMap.DEF_BASE).enable();
         map.addDefaultControls();
 
