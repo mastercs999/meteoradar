@@ -2,6 +2,10 @@
     margin: 0
 }
 
+.wrapper:first-child {
+    margin-bottom: 30px
+}
+
 .main {
     display: flex
 }
@@ -16,16 +20,33 @@
 }
 
 .time-holder {
-    margin: 10px 0
+    background-color: rgba(221, 221, 221, 0.5);
+}
+
+.side {
+    height: 500px
+}
+
+.side > * {
+    display: block;
+    width: 130px
+}
+
+.side > input, .side .hours {
+    height: 25px
 }
 
 .times {
-    height: 458px
+    height: 100%
+}
+
+.under {
+    text-align: center;
 }
 
 .slider-selection {
-    width: 800px;
-    display: block;
+    width: 99%;
+    display: inline-block;
 }
 
 .map-button {
