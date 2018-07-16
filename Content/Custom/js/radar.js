@@ -244,10 +244,21 @@ function Radar(wrapper, initDateTime, getUrlFunc) {
         mapDiv.width(mapDiv.parent().width() - mapDiv.next().width())
         mapDiv.height(window.innerHeight - wrapper.find(".under").outerHeight())
 
-        // Init and center
+        // Center of CZ
         var center = SMap.Coords.fromWGS84(15.472962, 49.817492);
 
+        // Load map
         var map = new SMap(JAK.gel(mapDiv[0]), center, 8);
+
+        // Set zoom by some points
+        var points = [
+            SMap.Coords.fromWGS84(13.2883104, 50.6347454),
+            SMap.Coords.fromWGS84(18.322215, 49.1988972),
+        ];
+        var result = map.computeCenterZoom(points, false);
+        map.setZoom(result[1]);
+
+        // Add controls
         map.addDefaultLayer(SMap.DEF_BASE).enable();
         map.addDefaultControls();
 
