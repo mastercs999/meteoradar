@@ -183,7 +183,7 @@ function Radar(wrapper, initDateTime, getUrlFunc) {
         animatedIndex = 0;
 
         // Set slider's max value
-        wrapper.find(".slider-selection").attr("max", snapshots["images"].length - 1)
+        wrapper.find(".slider-selection").attr("max", snapshots["images"].length - 1).val(snapshots["images"].length - 1);
     }
 
     // Get indicies of selected images in select
